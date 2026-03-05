@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.description = "A Rails gem that captures real request and response examples from Minitest integration tests, redacts unstable values, and writes them into an existing OpenAPI spec."
   spec.homepage = "https://github.com/galiyafatt2/minitest_openapi_examples"
   spec.license = "MIT"
-  spec.required_ruby_version = ">= 2.6.0"
+  spec.required_ruby_version = ">= 3.1.0"
 
   spec.metadata["allowed_push_host"] = "https://rubygems.org"
 
