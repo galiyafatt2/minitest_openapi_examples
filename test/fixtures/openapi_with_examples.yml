@@ -1,0 +1,19 @@
+openapi: 3.1.0
+info:
+  title: Test API
+  version: 1.0.0
+paths:
+  /api/v1/articles/{id}:
+    get:
+      operationId: getArticle
+      responses:
+        "200":
+          description: Successful response
+          content:
+            application/json:
+              examples:
+                success:
+                  summary: Existing example
+                  value:
+                    data:
+                      id: "123"

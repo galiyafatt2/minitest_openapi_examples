@@ -1,39 +1,179 @@
 # MinitestOpenapiExamples
 
-TODO: Delete this and the text below, and describe your gem
+MinitestOpenapiExamples records real request and response examples from Rails Minitest request tests, sanitizes unstable or sensitive values, and writes them into an existing OpenAPI spec.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/minitest_openapi_examples`. To experiment with that code, run `bin/console` for an interactive prompt.
+It is designed for teams that already maintain an OpenAPI document and want to keep examples in sync with real test coverage, without switching to RSpec or adopting a large DSL.
+
+## Features
+
+- Record response examples from Rails Minitest request tests
+- Record request body examples for write actions
+- Sanitize tokens, emails, UUIDs, timestamps, and other unstable values
+- Write examples into an existing OpenAPI YAML file
+- Auto-write examples during test runs, if enabled
+- Run sync manually through a Rake task
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add the gem to your application's Gemfile:
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+gem "minitest_openapi_examples"
+````
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+Then run:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
-
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_PRIOR_TO_RELEASE_TO_RUBYGEMS_ORG
+```bash
+bundle install
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+Configure the gem in your Rails application:
+
+```ruby
+MinitestOpenapiExamples.configure do |config|
+  config.spec_path = Rails.root.join("doc/openapi.yml").to_s
+  config.auto_write = false
+  config.default_content_type = "application/json"
+
+  config.sanitizers = [
+    ->(value) { value.gsub(/Bearer\s+\S+/, "Bearer [FILTERED]") },
+    ->(value) { value.gsub(/\b[\w.%+-]+@[\w.-]+\.\w+\b/, "[FILTERED_EMAIL]") }
+  ]
+end
+```
+
+Include the test helper in your request test base class:
+
+```ruby
+class ActionDispatch::IntegrationTest
+  include MinitestOpenapiExamples::TestHelper
+end
+```
+
+Annotate a test class with OpenAPI endpoint metadata:
+
+```ruby
+class Api::V1::ArticlesTest < ActionDispatch::IntegrationTest
+  openapi_examples path: "/api/v1/articles/{id}", method: :get, operation_id: "getArticle"
+
+  test "shows an article" do
+    article = articles(:published)
+
+    get api_v1_article_path(article), headers: auth_headers
+
+    assert_response :success
+
+    record_openapi_example!(
+      name: "published_article",
+      summary: "Published article response",
+      path_params: { id: article.id }
+    )
+  end
+end
+```
+
+For create or update actions, you can also record a request body example:
+
+```ruby
+class Api::V1::ArticlesTest < ActionDispatch::IntegrationTest
+  openapi_examples path: "/api/v1/articles", method: :post, operation_id: "createArticle"
+
+  test "creates an article" do
+    payload = { title: "Hello" }
+
+    post api_v1_articles_path, params: payload, as: :json
+
+    assert_response :created
+
+    record_openapi_example!(
+      name: "create_article",
+      summary: "Create article request",
+      request_body: payload
+    )
+  end
+end
+```
+
+Recorded examples are written into the matching OpenAPI operation by:
+
+1. `operationId`, if provided
+2. otherwise `path + method`
+
+Response examples are written under:
+
+* `responses.*.content.*.examples`
+
+Request examples are written under:
+
+* `requestBody.content.*.examples`
+
+## Manual Sync
+
+If `auto_write` is disabled, you can write recorded examples manually:
+
+```bash
+bin/rails openapi:examples:write
+```
+
+## Configuration
+
+The gem supports these configuration options:
+
+* `spec_path` - path to the OpenAPI YAML file
+* `sanitizers` - array of lambdas used to sanitize string values
+* `auto_write` - write examples immediately after recording
+* `default_content_type` - fallback content type for request and response examples
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake test` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+After checking out the repo, run:
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+```bash
+bin/setup
+bundle exec rake test
+```
+
+You can also use:
+
+```bash
+bin/console
+```
+
+to experiment with the gem locally.
+
+To install this gem onto your local machine, run:
+
+```bash
+bundle exec rake install
+```
+
+## Roadmap
+
+Planned improvements include:
+
+* Better YAML output stability
+* Optional request header example support
+* Rails auto-inclusion for `ActionDispatch::IntegrationTest`
+* Improved duplicate example handling across repeated runs
+* CI mode for detecting spec drift
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/minitest_openapi_examples. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/[USERNAME]/minitest_openapi_examples/blob/master/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub:
+
+[https://github.com/galiyafatt2/minitest_openapi_examples](https://github.com/galiyafatt2/minitest_openapi_examples)
+
+Please make sure changes include tests where appropriate.
 
 ## License
 
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+This gem is available as open source under the terms of the MIT License.
 
 ## Code of Conduct
 
-Everyone interacting in the MinitestOpenapiExamples project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/[USERNAME]/minitest_openapi_examples/blob/master/CODE_OF_CONDUCT.md).
+Everyone interacting in the MinitestOpenapiExamples project is expected to follow the code of conduct:
+
+[https://github.com/galiyafatt2/minitest_openapi_examples/blob/main/CODE_OF_CONDUCT.md](https://github.com/galiyafatt2/minitest_openapi_examples/blob/main/CODE_OF_CONDUCT.md)
+

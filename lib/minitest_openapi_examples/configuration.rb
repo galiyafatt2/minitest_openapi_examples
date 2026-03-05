@@ -2,11 +2,11 @@
 
 module MinitestOpenapiExamples
   class Configuration
-    attr_accessor :spec_path, :scrubbers, :auto_write, :default_content_type
+    attr_accessor :spec_path, :sanitizers, :auto_write, :default_content_type
 
     def initialize
       @spec_path = "doc/openapi.yaml"
-      @scrubbers = []
+      @sanitizers = []
       @auto_write = false
       @default_content_type = "application/json"
     end

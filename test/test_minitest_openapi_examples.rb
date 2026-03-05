@@ -16,7 +16,7 @@ class MinitestOpenapiExamplesTest < Minitest::Test
 
     assert_instance_of MinitestOpenapiExamples::Configuration, configuration
     assert_equal "doc/openapi.yaml", configuration.spec_path
-    assert_equal [], configuration.scrubbers
+    assert_equal [], configuration.sanitizers
     assert_equal false, configuration.auto_write
     assert_equal "application/json", configuration.default_content_type
   end
