@@ -1,0 +1,23 @@
+name: Publish gem
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: refs/tags/v0.2.0
+          persist-credentials: false
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2.3"
+      - run: gem build minitest_openapi_examples.gemspec
+      - uses: rubygems/configure-rubygems-credentials@main
+      - run: gem push --host https://rubygems.org minitest_openapi_examples-0.2.0.gem
