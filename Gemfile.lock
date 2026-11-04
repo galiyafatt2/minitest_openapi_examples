@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    minitest_openapi_examples (0.1.0)
+    minitest_openapi_examples (0.2.0)
       railties (>= 6.1)
 
 GEM
