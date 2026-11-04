@@ -19,5 +19,25 @@ jobs:
         with:
           ruby-version: "3.2.3"
       - run: gem build minitest_openapi_examples.gemspec
-      - uses: rubygems/configure-rubygems-credentials@main
-      - run: gem push --host https://rubygems.org minitest_openapi_examples-0.2.0.gem
+      - name: Publish to RubyGems
+        env:
+          RUBYGEMS_OWNER_ID: "247557"
+        shell: bash
+        run: |
+          # RubyGems requires the owner ID as a string when publishing a new gem.
+          oidc_token=$(curl --fail --silent --show-error \
+            --header "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=rubygems.org" | jq -er '.value')
+          echo "::add-mask::${oidc_token}"
+
+          api_key=$(jq -nc --arg jwt "$oidc_token" --arg owner "$RUBYGEMS_OWNER_ID" \
+            '{jwt: $jwt, owner: $owner}' | \
+            curl --fail --silent --show-error \
+              --header 'Content-Type: application/json' \
+              --header 'Accept: application/json' \
+              --data-binary @- \
+              https://rubygems.org/api/v1/oidc/trusted_publisher/exchange_token | \
+            jq -er '.rubygems_api_key')
+          echo "::add-mask::${api_key}"
+
+          GEM_HOST_API_KEY="$api_key" gem push --host https://rubygems.org minitest_openapi_examples-0.2.0.gem
