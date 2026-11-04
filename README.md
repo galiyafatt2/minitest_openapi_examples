@@ -18,8 +18,8 @@ It is designed for teams that already maintain an OpenAPI document and want to k
 Add the gem to your application's Gemfile:
 
 ```ruby
-gem "minitest_openapi_examples", git: "https://github.com/galiyafatt2/minitest_openapi_examples"
-````
+gem "minitest_openapi_examples", "~> 0.2.0"
+```
 
 Then run:
 
