@@ -3,6 +3,7 @@
 require "yaml"
 
 module MinitestOpenapiExamples
+  # Loads and saves the configured OpenAPI YAML document.
   class OpenapiDocument
     attr_reader :path, :data
 

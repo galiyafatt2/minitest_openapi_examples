@@ -9,7 +9,8 @@ Gem::Specification.new do |spec|
   spec.email = ["elizabeth.mor324@gmail.com"]
 
   spec.summary = "Record OpenAPI examples from Rails Minitest request tests"
-  spec.description = "A Rails gem that captures real request and response examples from Minitest integration tests, redacts unstable values, and writes them into an existing OpenAPI spec."
+  spec.description = "Captures request and response examples from Rails Minitest integration tests, " \
+                     "redacts unstable values, and writes the examples into an existing OpenAPI spec."
   spec.homepage = "https://github.com/galiyafatt2/minitest_openapi_examples"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.0"

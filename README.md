@@ -117,6 +117,26 @@ If `auto_write` is disabled, you can write recorded examples manually:
 bin/rails openapi:examples:write
 ```
 
+## Check examples in CI
+
+Enable check mode in your Rails test setup, alongside your existing gem configuration.
+
+```ruby
+MinitestOpenapiExamples.configure do |config|
+  config.check_examples = ENV["OPENAPI_EXAMPLES_CHECK"] == "1"
+end
+```
+
+Run the request tests that call `record_openapi_example!`.
+
+```sh
+OPENAPI_EXAMPLES_CHECK=1 bin/rails test test/integration
+```
+
+Each recording compares its sanitized response and any supplied request body with the corresponding examples in the configured spec. A missing or changed example fails the test and identifies the example and endpoint. Update the checked-in example at that key and rerun the test. Check mode takes precedence over `auto_write` and leaves the spec file untouched.
+
+Use distinct, stable example names within each operation, status, and media type. The check compares the exact key, including any suffix you explicitly pass in `name:`. Examples that your test run doesn't record are outside the check.
+
 ## Configuration
 
 The gem supports these configuration options:
@@ -124,6 +144,7 @@ The gem supports these configuration options:
 * `spec_path` - path to the OpenAPI YAML file
 * `sanitizers` - array of lambdas used to sanitize string values
 * `auto_write` - write examples immediately after recording
+* `check_examples` - compare recorded examples against the spec without writing (default: false)
 * `default_content_type` - fallback content type for request and response examples
 
 ## Development
@@ -157,7 +178,6 @@ Planned improvements include:
 * Optional request header example support
 * Rails auto-inclusion for `ActionDispatch::IntegrationTest`
 * Improved duplicate example handling across repeated runs
-* CI mode for detecting spec drift
 
 ## Contributing
 

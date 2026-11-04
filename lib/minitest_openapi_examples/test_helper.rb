@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module MinitestOpenapiExamples
+  # Records examples from Rails integration tests.
   module TestHelper
     def self.included(base)
       base.extend(ClassMethods)
     end
 
+    # Declares the OpenAPI operation exercised by a test class.
     module ClassMethods
       def openapi_examples(path:, method:, operation_id: nil)
         @openapi_examples_metadata = {
@@ -24,6 +26,7 @@ module MinitestOpenapiExamples
       end
     end
 
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def record_openapi_example!(
       name: nil,
       summary: nil,
@@ -50,11 +53,18 @@ module MinitestOpenapiExamples
 
       sanitized_example = MinitestOpenapiExamples::Redactor.new.call(example)
 
-      MinitestOpenapiExamples.registry.add(sanitized_example)
-      MinitestOpenapiExamples::ExampleSync.new.call if MinitestOpenapiExamples.configuration.auto_write
+      configuration = MinitestOpenapiExamples.configuration
+      if configuration.check_examples
+        document = OpenapiDocument.new
+        ExampleWriter.new(document: document).call(sanitized_example, check: true)
+      else
+        MinitestOpenapiExamples.registry.add(sanitized_example)
+        ExampleSync.new.call if configuration.auto_write
+      end
 
       sanitized_example
     end
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
     private
 

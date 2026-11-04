@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module MinitestOpenapiExamples
+  # Finds the OpenAPI operation for a recorded example.
   class OperationFinder
     def initialize(document:)
       @document = document

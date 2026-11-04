@@ -13,6 +13,7 @@ require_relative "minitest_openapi_examples/example_sync"
 
 require_relative "minitest_openapi_examples/railtie" if defined?(Rails::Railtie)
 
+# Records Rails integration test examples for OpenAPI documentation.
 module MinitestOpenapiExamples
   class Error < StandardError; end
 

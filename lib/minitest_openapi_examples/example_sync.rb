@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module MinitestOpenapiExamples
+  # Writes the recorded examples to the configured OpenAPI document.
   class ExampleSync
     def initialize(
       registry: MinitestOpenapiExamples.registry,

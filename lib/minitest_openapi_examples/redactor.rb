@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 module MinitestOpenapiExamples
+  # Applies the configured sanitizers to recorded example data.
   class Redactor
     def initialize(sanitizers: MinitestOpenapiExamples.configuration.sanitizers)
       @sanitizers = Array(sanitizers)
     end
 
+    # rubocop:disable Metrics/AbcSize, Metrics/MethodLength
     def call(value)
       case value
       when RecordedExample
@@ -34,6 +36,7 @@ module MinitestOpenapiExamples
         value
       end
     end
+    # rubocop:enable Metrics/AbcSize, Metrics/MethodLength
 
     private
 
